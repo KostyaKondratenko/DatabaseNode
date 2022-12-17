@@ -1,5 +1,5 @@
-import Connection.ConnectionClients;
-import Connection.ConnectionNodes;
+import Connection.Server;
+import Utils.NodeLinker;
 import EntityList.ConcurrentRecordMap;
 import Interfaces.*;
 import EntityList.ConcurrentNodeList;
@@ -16,32 +16,49 @@ public class DatabaseNode {
     private static IConcurrentStorage<Node> nodeStorage;
     private static IConcurrentOperationalStorage<Record> recordStorage;
     private static IParameterScanner scanner;
-    private static IConnectionNodes connectionNodes;
-    private static ILogger logger = new Logger();
+    private static INodeLinker connectionNodes;
+    private static ILogger logger;
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] arg) throws IOException {
+
+        String[] args;
+        if (arg.length != 0) {
+            args = arg;
+        } else {
+            args = new String[]{"-tcpport", "9991", "-record", "17:12"};
+        }
+
+        // Initializing global variables
+        recordStorage = new ConcurrentRecordMap();
+        nodeStorage = new ConcurrentNodeList();
+        logger = new Logger();
 
         // Parameter scan loop
         scanner = new ParameterScanner(args);
         ExecutionParameterList executionParams = scanner.extractParameters();
 
-        // Connect to nodes
-        nodeStorage = new ConcurrentNodeList();
-        connectionNodes = new ConnectionNodes(
-                executionParams.getParameterConnections(),
-                nodeStorage,
-                logger
-        );
-        connectionNodes.connectNodes();
-
-        // Starting a server and waiting for clients
-        recordStorage = new ConcurrentRecordMap();
-        ConnectionClients connectionClients = new ConnectionClients(
+        // Starting a server
+        Server server = new Server(
                 executionParams.getParameterPort(),
                 recordStorage,
                 nodeStorage,
                 logger
         );
-        connectionClients.waitClient();
+        server.startServer();
+
+        // Connect to nodes
+        connectionNodes = new NodeLinker(
+                executionParams.getParameterConnections(),
+                server.getCurrentNode(),
+                nodeStorage,
+                logger
+        );
+        connectionNodes.connectNodes();
+
+        // Adding record to a storage
+        recordStorage.add(executionParams.getParameterRecord().getRecord());
+
+        // Waiting for clients
+        server.waitClient();
     }
 }

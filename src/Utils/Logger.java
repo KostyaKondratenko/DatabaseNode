@@ -11,9 +11,17 @@ public class Logger implements ILogger {
     }
 
     @Override
-    public void logSuccess(String description) {
+    public
+    void logRequest(String description) {
         final String delimiter = delimiter(description);
-        System.out.println("OK" + delimiter + description);
+        System.out.println("Request" + delimiter + description);
+    }
+
+    @Override
+    public
+    void logResponse(String description) {
+        final String delimiter = delimiter(description);
+        System.out.println("Response" + delimiter + description);
     }
 
     @Override

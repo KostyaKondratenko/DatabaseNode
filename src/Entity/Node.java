@@ -1,6 +1,9 @@
 package Entity;
 
+import java.util.UUID;
+
 public class Node {
+
     private final String address;
     private final int port;
 
@@ -23,6 +26,13 @@ public class Node {
     }
 
     public boolean equals(Node node) {
-        return address == node.getAddress() && port == node.getPort();
+        return equalAddresses(address, node.getAddress()) && port == node.getPort();
+    }
+
+    private boolean equalAddresses(String address, String anotherAddress) {
+        if (address.equalsIgnoreCase("localhost")) {
+            return "localhost".equalsIgnoreCase(anotherAddress) || "0.0.0.0".equalsIgnoreCase(anotherAddress);
+        }
+        return address.equalsIgnoreCase(anotherAddress);
     }
 }

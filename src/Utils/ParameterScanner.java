@@ -1,10 +1,11 @@
 package Utils;
 
+import Enums.ExecutionParameterType;
 import Execution.*;
 import Interfaces.IParameterScanner;
-import Operation.Operation;
+import Entity.Operation;
 import Operation.OperationParameterList;
-import Operation.OperationType;
+import Enums.OperationType;
 import Parameter.ParameterNode;
 import Parameter.ParameterPort;
 import Parameter.ParameterRecord;
@@ -90,8 +91,10 @@ public class ParameterScanner implements IParameterScanner {
                 switch (args[i]) {
                     case "-visited":
                         operation.addVisited(new ParameterNode(args[++i]).getNode());
+                        break;
                     default:
                         operation.setParams(args[i]);
+                        break;
                 }
             }
         }

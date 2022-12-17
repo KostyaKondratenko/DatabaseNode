@@ -19,7 +19,9 @@ public class ConcurrentRecordMap implements IConcurrentOperationalStorage<Record
 
     @Override
     public void add(Record value) {
-        savedRecords.put(value.getKey(), value.getValue());
+        if (value != null) {
+            savedRecords.put(value.getKey(), value.getValue());
+        }
     }
 
     @Override
@@ -30,7 +32,10 @@ public class ConcurrentRecordMap implements IConcurrentOperationalStorage<Record
     @Override
     public Record get(int index) {
         Integer value = savedRecords.get(index);
-        return new Record(index, value);
+        if (value != null) {
+            return new Record(index, value);
+        }
+        return null;
     }
 
     @Override
@@ -60,5 +65,10 @@ public class ConcurrentRecordMap implements IConcurrentOperationalStorage<Record
             }
         }
         return new Record(minEntry.getKey(), minEntry.getValue());
+    }
+
+    @Override
+    public String toString() {
+        return savedRecords.toString();
     }
 }

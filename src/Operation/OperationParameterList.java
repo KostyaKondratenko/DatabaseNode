@@ -1,5 +1,8 @@
 package Operation;
 
+import Entity.Operation;
+import Enums.OperationType;
+
 import java.util.ArrayList;
 import java.util.List;
 

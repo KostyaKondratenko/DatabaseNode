@@ -23,7 +23,13 @@ public class ConcurrentNodeList implements IConcurrentStorage<Node>, Iterable<No
     @Override
     public void add(Node value) {
         synchronized (connectedNodes) {
-            connectedNodes.add(value);
+            boolean contains = false;
+            for (Node connected : connectedNodes) {
+                contains = connected.equals(value);
+            }
+            if (!contains) {
+                connectedNodes.add(value);
+            }
         }
     }
 
