@@ -6,15 +6,16 @@ import Enums.OperationType;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Wrapper around a list of Operations
+ *
+ * @see Operation
+ */
 public class OperationParameterList {
     private final List<Operation> operations;
 
     public OperationParameterList() {
         this.operations = new ArrayList<>();
-    }
-
-    public OperationParameterList(List<Operation> operations) {
-        this.operations = operations;
     }
 
     public List<Operation> getOperations() {

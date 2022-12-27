@@ -1,13 +1,13 @@
 package Utils;
 
 import Enums.ExecutionParameterType;
-import Execution.*;
 import Interfaces.IParameterScanner;
 import Entity.Operation;
 import Operation.OperationParameterList;
 import Enums.OperationType;
+import Parameter.ExecutionParameterList;
 import Parameter.ParameterNode;
-import Parameter.ParameterPort;
+import Parameter.ParameterInteger;
 import Parameter.ParameterRecord;
 
 import java.io.IOException;
@@ -60,7 +60,7 @@ public class ParameterScanner implements IParameterScanner {
             ExecutionParameterType type = ExecutionParameterType.valueBy(args[i]);
             switch (type) {
                 case tcpport:
-                    parameters.setParameterPort(new ParameterPort(args[++i]));
+                    parameters.setParameterPort(new ParameterInteger(args[++i]));
                     break;
                 case record:
                     parameters.setParameterRecord(new ParameterRecord(args[++i]));

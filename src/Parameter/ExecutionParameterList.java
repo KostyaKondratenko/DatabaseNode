@@ -1,12 +1,11 @@
-package Execution;
+package Parameter;
 
 import Parameter.ParameterNode;
-import Parameter.ParameterPort;
+import Parameter.ParameterInteger;
 import Parameter.ParameterRecord;
 import Utils.ParameterScanner;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -25,24 +24,27 @@ import java.util.List;
 public class ExecutionParameterList {
 
     // region Variables
-    private ParameterPort parameterPort;
+    /** TCP port, which is used to wait for connections from clients */
+    private ParameterInteger parameterInteger;
+    /** A pair of integers being the initial values stored in current node */
     private ParameterRecord parameterRecord;
+    /** A list of other nodes already in the network, to which current node should be connected */
     private List<ParameterNode> parameterNodes;
     // endregion
 
     public ExecutionParameterList() {
-        parameterPort = null;
+        parameterInteger = null;
         parameterRecord = null;
         parameterNodes = new ArrayList<>();
     }
 
     // region Getters & Setters
-    public void setParameterPort(ParameterPort parameterPort) {
-        this.parameterPort = parameterPort;
+    public void setParameterPort(ParameterInteger parameterInteger) {
+        this.parameterInteger = parameterInteger;
     }
 
-    public ParameterPort getParameterPort() {
-        return parameterPort;
+    public ParameterInteger getParameterPort() {
+        return parameterInteger;
     }
 
     public void setParameterRecord(ParameterRecord parameterRecord) {

@@ -5,7 +5,7 @@ import Interfaces.*;
 import EntityList.ConcurrentNodeList;
 import Entity.Node;
 import Entity.Record;
-import Execution.ExecutionParameterList;
+import Parameter.ExecutionParameterList;
 import Utils.ParameterScanner;
 import Utils.Logger;
 
@@ -19,14 +19,7 @@ public class DatabaseNode {
     private static INodeLinker connectionNodes;
     private static ILogger logger;
 
-    public static void main(String[] arg) throws IOException {
-
-        String[] args;
-        if (arg.length != 0) {
-            args = arg;
-        } else {
-            args = new String[]{"-tcpport", "9991", "-record", "17:12"};
-        }
+    public static void main(String[] args) throws IOException {
 
         // Initializing global variables
         recordStorage = new ConcurrentRecordMap();
