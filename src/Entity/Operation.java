@@ -4,24 +4,18 @@ import Enums.OperationType;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class Operation {
     private OperationType operationType;
     private String params;
-    private List<Node> visited;
+    private List<UUID> visited;
 
     public Operation(OperationType operationType) {
         this.operationType = operationType;
         this.params = "";
         this.visited = new ArrayList<>();
     }
-
-    public Operation(OperationType operationType, String params, List<Node> visited) {
-        this.operationType = operationType;
-        this.params = params;
-        this.visited = visited;
-    }
-
 
     public OperationType getOperationType() {
         return operationType;
@@ -31,7 +25,7 @@ public class Operation {
         this.operationType = operationType;
     }
 
-    public List<Node> getVisited() {
+    public List<UUID> getVisited() {
         return visited;
     }
 
@@ -43,13 +37,13 @@ public class Operation {
         this.params = params;
     }
 
-    public void addVisited(Node node) {
+    public void addVisited(UUID node) {
         if (!hasVisited(node)) {
             visited.add(node);
         }
     }
 
-    private boolean hasVisited(Node node) {
+    private boolean hasVisited(UUID node) {
         for (int i = 0; i < visited.size(); ++i) {
             if (node.equals(visited.get(i))) {
                 return true;

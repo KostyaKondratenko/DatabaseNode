@@ -1,19 +1,25 @@
 package Operation;
 
 import Connection.Client;
+import Entity.IdentifiableNode;
 import Entity.Operation;
 import Enums.OperationType;
 import Enums.ResponseType;
 import Entity.Node;
 import Entity.Record;
+import Interfaces.IIdentifiable;
 import Interfaces.ILogger;
+import Parameter.ParameterIdentifiableNode;
 import Parameter.ParameterNode;
 import Parameter.ParameterInteger;
 import Parameter.ParameterRecord;
+import Utils.CommandBuilder;
+import Utils.NetworkInformation;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * A class that sends a requests to a neighbour nodes to get the result of operation.
@@ -34,15 +40,15 @@ public class GlobalProcessor {
      * A list of connected, neighbouring nodes to a current node.
      * @see Node
      */
-    private List<Node> connectedNodes;
+    private List<IdentifiableNode> connectedNodes;
     /** A current node. */
-    private Node currentNode;
+    private IdentifiableNode currentNode;
     /** A simple event logger. */
     private ILogger logger;
 
     public GlobalProcessor(LocalProcessor operationProcessor,
-                           List<Node> connectedNodes,
-                           Node currentNode,
+                           List<IdentifiableNode> connectedNodes,
+                           IdentifiableNode currentNode,
                            ILogger logger) {
         this.operationProcessor = operationProcessor;
         this.connectedNodes = connectedNodes;
@@ -96,9 +102,9 @@ public class GlobalProcessor {
      * @see Node
      */
     private String processConnectionOperation(String params) {
-        Node connectNode = new ParameterNode(params).getNode();
+        IdentifiableNode connectNode = new ParameterIdentifiableNode(params).getNode();
         operationProcessor.connect(connectNode);
-        return ResponseType.ok.toString();
+        return currentNode.getID().toString();
     }
 
     /**
@@ -111,7 +117,7 @@ public class GlobalProcessor {
      * @see Node
      */
     private String processDisconnectionOperation(String params) {
-        Node disconnectNode = new ParameterNode(params).getNode();
+        IdentifiableNode disconnectNode = new ParameterIdentifiableNode(params).getNode();
         operationProcessor.disconnect(disconnectNode);
         return ResponseType.ok.toString();
     }
@@ -132,7 +138,9 @@ public class GlobalProcessor {
         if (result) {
             return ResponseType.ok.toString();
         } else {
-            List<String> childResults = connectNodes(operation);
+            List<String> childResults = connectNodes(operation,
+                    newResult -> ResponseType.ok.hasSubstringIn(newResult)
+            );
             for (String childResult : childResults) {
                 if (ResponseType.ok.hasSubstringIn(childResult)) {
                     return ResponseType.ok.toString();
@@ -160,7 +168,9 @@ public class GlobalProcessor {
         if (result != null) {
             return result.toString();
         } else {
-            List<String> childResults = connectNodes(operation);
+            List<String> childResults = connectNodes(operation,
+                    newResult -> !ResponseType.error.hasSubstringIn(newResult)
+            );
             for (String childResult : childResults) {
                 if (!ResponseType.error.hasSubstringIn(childResult)) {
                     return childResult;
@@ -186,9 +196,14 @@ public class GlobalProcessor {
         int key = new ParameterInteger(operation.getParams()).getValue();
         boolean result = operationProcessor.findKey(key);
         if (result) {
-            return currentNode.toString();
+            return new Node(
+                    new NetworkInformation().firstIPv4Interface(),
+                    currentNode.getPort()
+            ).toString();
         } else {
-            List<String> childResults = connectNodes(operation);
+            List<String> childResults = connectNodes(operation,
+                    newResult -> !ResponseType.error.hasSubstringIn(newResult)
+            );
             for (String childResult : childResults) {
                 if (!ResponseType.error.hasSubstringIn(childResult)) {
                     return childResult;
@@ -215,7 +230,7 @@ public class GlobalProcessor {
         if (result != null) {
             results.add(result);
         }
-        List<String> childResults = connectNodes(operation);
+        List<String> childResults = connectNodes(operation, newResult -> false);
         for (String childResult : childResults) {
             if (!ResponseType.error.hasSubstringIn(childResult)) {
                 ParameterRecord paramRecord = new ParameterRecord(childResult);
@@ -246,7 +261,7 @@ public class GlobalProcessor {
         if (result != null) {
             results.add(result);
         }
-        List<String> childResults = connectNodes(operation);
+        List<String> childResults = connectNodes(operation, newResult -> false);
         for (String childResult : childResults) {
             if (!ResponseType.error.hasSubstringIn(childResult)) {
                 ParameterRecord paramRecord = new ParameterRecord(childResult);
@@ -285,7 +300,7 @@ public class GlobalProcessor {
     private String processTerminateOperation(Operation operation) {
         operation.setOperationType(OperationType.disconnect);
         operation.setParams(currentNode.toString());
-        connectNodes(operation);
+        connectNodes(operation, newResult -> false);
         return ResponseType.ok.toString();
     }
 
@@ -297,9 +312,9 @@ public class GlobalProcessor {
      * @param operation an operation to send to connected nodes
      * @return a list of responses from connected nodes.
      */
-    private List<String> connectNodes(Operation operation) {
+    private List<String> connectNodes(Operation operation, StopCriteria stopCriteria) {
 
-        List<Node> notVisited = getNotVisitedNodes(operation.getVisited());
+        List<IdentifiableNode> notVisited = getNotVisitedNodes(operation.getVisited());
 
         // Building a command
         CommandBuilder builder = new CommandBuilder();
@@ -308,7 +323,7 @@ public class GlobalProcessor {
         builder.addVisitedNode(currentNode);
         String command = builder.build();
 
-        return connectToChildNodes(notVisited, command);
+        return connectToChildNodes(notVisited, command, stopCriteria);
     }
 
     /**
@@ -317,10 +332,10 @@ public class GlobalProcessor {
      * @param operationVisited an operation that contains a list of already visited nodes.
      * @return a list of not visited nodes.
      */
-    private List<Node> getNotVisitedNodes(List<Node> operationVisited) {
-        List<Node> notVisitedChildNodes = new ArrayList<>(connectedNodes);
+    private List<IdentifiableNode> getNotVisitedNodes(List<UUID> operationVisited) {
+        List<IdentifiableNode> notVisitedChildNodes = new ArrayList<>(connectedNodes);
 
-        for (Node visited : operationVisited) {
+        for (UUID visited : operationVisited) {
             notVisitedChildNodes.removeIf(node -> node.equals(visited));
         }
 
@@ -334,11 +349,17 @@ public class GlobalProcessor {
      * @return a list of responses from the connected nodes.
      * @see Node
      */
-    private List<String> connectToChildNodes(List<Node> notVisitedNodes, String command) {
+    private List<String> connectToChildNodes(List<IdentifiableNode> notVisitedNodes,
+                                             String command,
+                                             StopCriteria stopCriteria) {
 
         List<String> result = new ArrayList<>();
-        for (Node node : notVisitedNodes) {
-            result.add(connectToNode(node, command));
+        for (IdentifiableNode node : notVisitedNodes) {
+            String response = connectToNode(node, command);
+            result.add(response);
+            if (stopCriteria.stopNodeCalls(response)) {
+                break;
+            }
         }
         return result;
     }
@@ -362,4 +383,8 @@ public class GlobalProcessor {
 
         return ResponseType.error.toString();
     }
+}
+
+interface StopCriteria {
+    boolean stopNodeCalls(String newResult);
 }

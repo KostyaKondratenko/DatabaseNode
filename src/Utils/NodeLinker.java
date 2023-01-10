@@ -1,11 +1,12 @@
 package Utils;
 
 import Connection.Client;
+import Entity.IdentifiableNode;
 import Enums.ResponseType;
 import Interfaces.IConcurrentStorage;
 import Entity.Node;
 import Entity.Operation;
-import Operation.CommandBuilder;
+import Interfaces.IIdentifiable;
 import Parameter.ParameterNode;
 import Interfaces.INodeLinker;
 import Enums.OperationType;
@@ -13,6 +14,7 @@ import Interfaces.ILogger;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * A class to send a connection request to provided nodes.
@@ -20,13 +22,13 @@ import java.util.List;
  */
 public class NodeLinker implements INodeLinker {
     private final List<ParameterNode> connections;
-    private final Node currentNode;
-    private final IConcurrentStorage<Node> storage;
+    private final IdentifiableNode currentNode;
+    private final IConcurrentStorage<IdentifiableNode> storage;
     private final ILogger logger;
 
     public NodeLinker(List<ParameterNode> connections,
-                      Node currentNode,
-                      IConcurrentStorage<Node> storage,
+                      IdentifiableNode currentNode,
+                      IConcurrentStorage<IdentifiableNode> storage,
                       ILogger logger) {
         this.connections = connections;
         this.currentNode = currentNode;
@@ -54,11 +56,11 @@ public class NodeLinker implements INodeLinker {
         String response = client.connect(node, command);
 
         // Read the connection response
-        if (response != null && ResponseType.ok.hasSubstringIn(response)) {
-            storage.add(node);
+        UUID connectedNodeID = null;
+        if (response != null && (connectedNodeID = UUID.fromString(response)) != null) {
+            storage.add(new IdentifiableNode(connectedNodeID, node));
             logger.logEvent("Node " + node + " is connected with response " + response);
         } else {
-            storage.remove(node);
             logger.logError("Node " + node + " is NOT connected with response " + response);
         }
     }

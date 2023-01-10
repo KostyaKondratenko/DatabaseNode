@@ -1,5 +1,6 @@
-package Operation;
+package Parameter;
 
+import Entity.IdentifiableNode;
 import Entity.Operation;
 import Enums.OperationType;
 
@@ -24,6 +25,17 @@ public class OperationParameterList {
 
     public void add(Operation operation) {
         operations.add(operation);
+    }
+
+    public void setServerIPForConnectionType(String ip) {
+        for(Operation operation : operations) {
+            if (operation.getOperationType() == OperationType.connect) {
+                IdentifiableNode node = new ParameterIdentifiableNode(operation.getParams()).getNode();
+                operation.setParams(
+                        new IdentifiableNode(node.getID(), ip, node.getPort()).toString()
+                );
+            }
+        }
     }
 
     public boolean hasTermination() {

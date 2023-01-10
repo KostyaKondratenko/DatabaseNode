@@ -1,4 +1,5 @@
 import Connection.Server;
+import Entity.IdentifiableNode;
 import Utils.NodeLinker;
 import EntityList.ConcurrentRecordMap;
 import Interfaces.*;
@@ -13,7 +14,7 @@ import java.io.IOException;
 
 public class DatabaseNode {
 
-    private static IConcurrentStorage<Node> nodeStorage;
+    private static IConcurrentStorage<IdentifiableNode> nodeStorage;
     private static IConcurrentOperationalStorage<Record> recordStorage;
     private static IParameterScanner scanner;
     private static INodeLinker connectionNodes;
@@ -39,6 +40,9 @@ public class DatabaseNode {
         );
         server.startServer();
 
+        // Adding record to a storage
+        recordStorage.add(executionParams.getParameterRecord().getRecord());
+
         // Connect to nodes
         connectionNodes = new NodeLinker(
                 executionParams.getParameterConnections(),
@@ -47,9 +51,6 @@ public class DatabaseNode {
                 logger
         );
         connectionNodes.connectNodes();
-
-        // Adding record to a storage
-        recordStorage.add(executionParams.getParameterRecord().getRecord());
 
         // Waiting for clients
         server.waitClient();

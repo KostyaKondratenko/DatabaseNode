@@ -3,12 +3,9 @@ package EntityList;
 import Entity.Record;
 import Interfaces.IConcurrentOperationalStorage;
 
-import java.util.Iterator;
 import java.util.Map;
-import java.util.Spliterator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.function.Consumer;
 
 public class ConcurrentRecordMap implements IConcurrentOperationalStorage<Record> {
     private final ConcurrentMap<Integer, Integer> savedRecords;

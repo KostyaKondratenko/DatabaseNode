@@ -3,12 +3,8 @@ package Utils;
 import Enums.ExecutionParameterType;
 import Interfaces.IParameterScanner;
 import Entity.Operation;
-import Operation.OperationParameterList;
+import Parameter.*;
 import Enums.OperationType;
-import Parameter.ExecutionParameterList;
-import Parameter.ParameterNode;
-import Parameter.ParameterInteger;
-import Parameter.ParameterRecord;
 
 import java.io.IOException;
 
@@ -90,7 +86,7 @@ public class ParameterScanner implements IParameterScanner {
             } catch(IllegalArgumentException e) {
                 switch (args[i]) {
                     case "-visited":
-                        operation.addVisited(new ParameterNode(args[++i]).getNode());
+                        operation.addVisited(new ParameterID(args[++i]).getID());
                         break;
                     default:
                         operation.setParams(args[i]);

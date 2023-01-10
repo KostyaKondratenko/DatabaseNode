@@ -1,5 +1,6 @@
 package Operation;
 
+import Entity.IdentifiableNode;
 import Interfaces.IConcurrentOperationalStorage;
 import Interfaces.IConcurrentStorage;
 import Entity.Node;
@@ -15,10 +16,10 @@ public class LocalProcessor {
     /** A list of records stored in the current node */
     private IConcurrentOperationalStorage<Record> recordStorage;
     /** A list of connected nodes to the current node */
-    private IConcurrentStorage<Node> connectedNodes;
+    private IConcurrentStorage<IdentifiableNode> connectedNodes;
 
     public LocalProcessor(IConcurrentOperationalStorage<Record> recordStorage,
-                          IConcurrentStorage<Node> connectedNodes) {
+                          IConcurrentStorage<IdentifiableNode> connectedNodes) {
         this.recordStorage = recordStorage;
         this.connectedNodes = connectedNodes;
     }
@@ -28,7 +29,7 @@ public class LocalProcessor {
      * @param node a new node to connect to current node.
      * @see Node
      */
-    public void connect(Node node) {
+    public void connect(IdentifiableNode node) {
         connectedNodes.add(node);
     }
 
@@ -37,7 +38,7 @@ public class LocalProcessor {
      * @param node a new node to connect to current node.
      * @see Node
      */
-    public void disconnect(Node node) {
+    public void disconnect(IdentifiableNode node) {
         connectedNodes.remove(node);
     }
 

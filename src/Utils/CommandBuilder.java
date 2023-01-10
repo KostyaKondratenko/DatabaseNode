@@ -1,10 +1,13 @@
-package Operation;
+package Utils;
 
+import Entity.IdentifiableNode;
 import Entity.Node;
 import Entity.Operation;
+import Interfaces.IIdentifiable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * A builder for the request to a Node.
@@ -19,7 +22,7 @@ public class CommandBuilder {
     /** An operation to send in the request */
     private Operation operation;
     /** A list of already visited nodes to eliminate repetitions of the destination nodes. */
-    private List<Node> visited;
+    private List<UUID> visited;
 
     public CommandBuilder() {
         visited = new ArrayList<>();
@@ -32,20 +35,28 @@ public class CommandBuilder {
      */
     public void addOperation(Operation operation) {
         this.operation = operation;
-        addVisitedNodes(operation.getVisited());
+        operation.getVisited().forEach(this::addVisitedNode);
     }
 
     /**
      * Appends a node to a list of visited nodes.
      * @param node a node to append
      */
-    public void addVisitedNode(Node node) {
+    public void addVisitedNode(IIdentifiable node) {
+        addVisitedNode(node.getID());
+    }
+
+    /**
+     * Appends an identifier to a list of visited nodes.
+     * @param id an identifier to append
+     */
+    public void addVisitedNode(UUID id) {
         boolean present = false;
-        for (Node listNode : visited) {
-            present = listNode.equals(node);
+        for (UUID listNode : visited) {
+            present = listNode.equals(id);
         }
         if (!present) {
-            visited.add(node);
+            visited.add(id);
         }
     }
 
@@ -53,8 +64,8 @@ public class CommandBuilder {
      * Appends to a list of visited nodes.
      * @param nodeList a list to append.
      */
-    public void addVisitedNodes(List<Node> nodeList) {
-        for (Node listNode : nodeList) {
+    public void addVisitedNodes(List<IdentifiableNode> nodeList) {
+        for (IIdentifiable listNode : nodeList) {
             addVisitedNode(listNode);
         }
     }
@@ -71,7 +82,7 @@ public class CommandBuilder {
         if (params != null && !params.isEmpty()) {
             command += (delimiter + operation.getParams());
         }
-        for (Node visitedNode : visited) {
+        for (UUID visitedNode : visited) {
             command += (delimiter + "-visited" + delimiter + visitedNode.toString());
         }
         return command;

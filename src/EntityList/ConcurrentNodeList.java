@@ -1,30 +1,27 @@
 package EntityList;
 
-import Entity.Node;
+import Entity.IdentifiableNode;
 import Interfaces.IConcurrentStorage;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Spliterator;
+import java.util.*;
 import java.util.function.Consumer;
 
-public class ConcurrentNodeList implements IConcurrentStorage<Node>, Iterable<Node> {
-    private final List<Node> connectedNodes;
+public class ConcurrentNodeList implements IConcurrentStorage<IdentifiableNode>, Iterable<IdentifiableNode> {
+    private final List<IdentifiableNode> connectedNodes;
 
     public ConcurrentNodeList() {
         connectedNodes = new ArrayList<>();
     }
 
-    public List<Node> getConnectedNodes() {
+    public List<IdentifiableNode> getConnectedNodes() {
         return connectedNodes;
     }
 
     @Override
-    public void add(Node value) {
+    public void add(IdentifiableNode value) {
         synchronized (connectedNodes) {
             boolean contains = false;
-            for (Node connected : connectedNodes) {
+            for (IdentifiableNode connected : connectedNodes) {
                 contains = connected.equals(value);
             }
             if (!contains) {
@@ -34,11 +31,11 @@ public class ConcurrentNodeList implements IConcurrentStorage<Node>, Iterable<No
     }
 
     @Override
-    public void remove(Node value) {
+    public void remove(IdentifiableNode value) {
         synchronized (connectedNodes) {
             int removeIndex = -1;
             for (int i = 0; i < connectedNodes.size() && removeIndex == -1; ++i) {
-                Node connectedNode = connectedNodes.get(i);
+                IdentifiableNode connectedNode = connectedNodes.get(i);
                 if (connectedNode.equals(value)) {
                     removeIndex = i;
                 }
@@ -50,23 +47,28 @@ public class ConcurrentNodeList implements IConcurrentStorage<Node>, Iterable<No
     }
 
     @Override
-    public Iterator<Node> iterator() {
+    public Iterator<IdentifiableNode> iterator() {
         synchronized (connectedNodes) {
             return connectedNodes.iterator();
         }
     }
 
     @Override
-    public void forEach(Consumer<? super Node> action) {
+    public void forEach(Consumer<? super IdentifiableNode> action) {
         synchronized (connectedNodes) {
             connectedNodes.forEach(action);
         }
     }
 
     @Override
-    public Spliterator<Node> spliterator() {
+    public Spliterator<IdentifiableNode> spliterator() {
         synchronized (connectedNodes) {
             return connectedNodes.spliterator();
         }
+    }
+
+    @Override
+    public String toString() {
+        return connectedNodes.toString();
     }
 }

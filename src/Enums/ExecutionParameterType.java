@@ -30,7 +30,7 @@ public enum ExecutionParameterType {
         return descr;
     }
 
-    public static ExecutionParameterType valueBy(String descr) {
+    public static ExecutionParameterType valueBy(String descr) throws IllegalArgumentException {
         return Arrays.stream(ExecutionParameterType.values())
                 .filter(type -> descr.equalsIgnoreCase(type.toString()))
                 .findFirst()
