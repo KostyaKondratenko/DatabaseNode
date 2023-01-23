@@ -21,8 +21,22 @@ public class IdentifiableNode extends Node implements IIdentifiable {
         return id.equals(node.id);
     }
 
-    public boolean equals(UUID id) {
-        return id.equals(id);
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+
+        if (!(obj instanceof IdentifiableNode)) {
+            if (!(obj instanceof UUID)) {
+                return false;
+            }
+            UUID compID = (UUID) obj;
+            return id.equals(compID);
+        }
+
+        IdentifiableNode compNode = (IdentifiableNode) obj;
+        return compNode.getID().equals(compNode.getID());
     }
 
     @Override
