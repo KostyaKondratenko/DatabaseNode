@@ -36,7 +36,7 @@ public class IdentifiableNode extends Node implements IIdentifiable {
         }
 
         IdentifiableNode compNode = (IdentifiableNode) obj;
-        return compNode.getID().equals(compNode.getID());
+        return id.equals(compNode.getID());
     }
 
     @Override
